@@ -66,48 +66,11 @@
         <label for="password">Password</label>
         <input type="password" id="password" placeholder="Instagram Password">
         <label for="urls">Instagram Reel URLs (one per line)</label>
-        <textarea id="urls" rows="5" placeholder="Enter Instagram Reel URLs here, one per line, or leave empty to collect from saved reels."></textarea>
-        <button id="collect-btn">Collect Reels Links</button>
+        <textarea id="urls" rows="5" placeholder="Enter Instagram Reel URLs here, one per line."></textarea>
         <button id="download-btn">Download Reels</button>
         <div id="status" class="status"></div>
     </div>
     <script>
-        document.getElementById('collect-btn').addEventListener('click', function() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            fetch('http://192.168.1.120:5001/collect_links', { // Update the port if needed
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: username,
-                    password: password,
-                    headless: true
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    document.getElementById('status').innerText = 'Collected links successfully.';
-                    document.getElementById('status').classList.add('success');
-                    document.getElementById('status').classList.remove('error');
-                } else {
-                    document.getElementById('status').innerText = 'Error: ' + data.message;
-                    document.getElementById('status').classList.add('error');
-                    document.getElementById('status').classList.remove('success');
-                }
-                document.getElementById('status').style.display = 'block';
-            })
-            .catch(error => {
-                document.getElementById('status').innerText = 'Error: ' + error;
-                document.getElementById('status').classList.add('error');
-                document.getElementById('status').classList.remove('success');
-                document.getElementById('status').style.display = 'block';
-            });
-        });
-
         document.getElementById('download-btn').addEventListener('click', function() {
             const urls = document.getElementById('urls').value.split('\n').filter(url => url.trim() !== '');
 
@@ -118,17 +81,19 @@
                 },
                 body: JSON.stringify({ urls: urls })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    document.getElementById('status').innerText = 'Downloaded reels successfully.';
-                    document.getElementById('status').classList.add('success');
-                    document.getElementById('status').classList.remove('error');
-                } else {
-                    document.getElementById('status').innerText = 'Error: ' + data.message;
-                    document.getElementById('status').classList.add('error');
-                    document.getElementById('status').classList.remove('success');
-                }
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'reels.zip';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.getElementById('status').innerText = 'Downloaded reels successfully.';
+                document.getElementById('status').classList.add('success');
+                document.getElementById('status').classList.remove('error');
                 document.getElementById('status').style.display = 'block';
             })
             .catch(error => {

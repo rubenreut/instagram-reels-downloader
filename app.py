@@ -1,13 +1,20 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
 import random
 import time
 import tempfile
+import json
 import logging
 import multiprocessing
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import yt_dlp
+import zipfile
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
@@ -22,9 +29,8 @@ def index():
 def download_reels():
     data = request.json
     urls = data['urls']
-    output_directory = 'reels'
-    os.makedirs(output_directory, exist_ok=True)
 
+    output_directory = tempfile.mkdtemp()
     NUM_CORES = multiprocessing.cpu_count()
     MAX_WORKERS = max(1, NUM_CORES - 2)
 
@@ -36,7 +42,14 @@ def download_reels():
         for future in as_completed(futures):
             future.add_done_callback(update_progress_bar)
 
-    return jsonify({"status": "success"})
+    zip_filename = os.path.join(output_directory, 'reels.zip')
+    with zipfile.ZipFile(zip_filename, 'w') as zipf:
+        for root, dirs, files in os.walk(output_directory):
+            for file in files:
+                if file != 'reels.zip':
+                    zipf.write(os.path.join(root, file), file)
+
+    return send_file(zip_filename, as_attachment=True, attachment_filename='reels.zip')
 
 def download_reel(url, idx, output_directory):
     ydl_opts = {
