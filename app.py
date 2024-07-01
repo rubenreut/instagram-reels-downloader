@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import yt_dlp
 
 app = Flask(__name__, static_folder='static')
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
@@ -19,6 +19,8 @@ def index():
 def download_reels():
     data = request.json
     urls = data['urls']
+    username = data.get('username')
+    password = data.get('password')
     output_directory = 'reels'
     os.makedirs(output_directory, exist_ok=True)
 
@@ -39,6 +41,7 @@ def download_reels():
                 update_progress_bar(future)
             except Exception as e:
                 logging.error(f"Error in downloading: {str(e)}")
+                results.append({"url": futures[future], "status": "failed", "error": str(e)})
 
     return jsonify({"status": "success", "results": results})
 
