@@ -11,6 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import yt_dlp
 
@@ -50,9 +51,7 @@ def collect_links():
     ]
     chrome_options.add_argument(f"user-agent={random.choice(user_agents)}")
 
-    driver_path = '/opt/homebrew/bin/chromedriver'  # Adjust the path to your chromedriver
-    service = Service(driver_path)
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     try:
         driver.get("https://www.instagram.com/accounts/login/")
