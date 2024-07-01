@@ -41,4 +41,4 @@ def download_reel(url, idx, output_directory):
             return {"url": url, "status": "failed", "error": str(e)}
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True, ssl_context='adhoc')  # Enable HTTPS with adhoc SSL (for development/testing)
