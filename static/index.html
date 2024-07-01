@@ -26,7 +26,7 @@
             display: block;
             margin: 10px 0 5px;
         }
-        input, textarea, button {
+        textarea, button {
             width: 100%;
             padding: 10px;
             margin: 5px 0 10px;
@@ -61,10 +61,6 @@
 <body>
     <div class="container">
         <h1>Instagram Reels Downloader</h1>
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="Instagram Username">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Instagram Password">
         <label for="urls">Instagram Reel URLs (one per line)</label>
         <textarea id="urls" rows="5" placeholder="Enter Instagram Reel URLs here, one per line."></textarea>
         <button id="download-btn">Download Reels</button>
@@ -73,15 +69,13 @@
     <script>
         document.getElementById('download-btn').addEventListener('click', function() {
             const urls = document.getElementById('urls').value.split('\n').filter(url => url.trim() !== '');
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
         
-            fetch('http://192.168.1.120:5001/download_reels', { // Update the port if needed
+            fetch('http://192.168.1.120:5001/download_reels', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ urls: urls, username: username, password: password })
+                body: JSON.stringify({ urls: urls })
             })
             .then(response => response.json())
             .then(data => {
@@ -110,8 +104,6 @@
                 document.getElementById('status').style.display = 'block';
             });
         });
-        
-
     </script>
 </body>
 </html>
