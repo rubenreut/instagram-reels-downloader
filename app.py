@@ -1,17 +1,8 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
-import random
-import time
-import tempfile
-import json
 import logging
 import multiprocessing
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import yt_dlp
 
@@ -34,15 +25,22 @@ def download_reels():
     NUM_CORES = multiprocessing.cpu_count()
     MAX_WORKERS = max(1, NUM_CORES - 2)
 
+    results = []
+
     def update_progress_bar(future):
         pass  # Placeholder for progress update logic if needed
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {executor.submit(download_reel, url, idx, output_directory): url for idx, url in enumerate(urls)}
         for future in as_completed(futures):
-            future.add_done_callback(update_progress_bar)
+            try:
+                result = future.result()
+                results.append(result)
+                update_progress_bar(future)
+            except Exception as e:
+                logging.error(f"Error in downloading: {str(e)}")
 
-    return jsonify({"status": "success"})
+    return jsonify({"status": "success", "results": results})
 
 def download_reel(url, idx, output_directory):
     ydl_opts = {
@@ -56,8 +54,10 @@ def download_reel(url, idx, output_directory):
         try:
             ydl.download([url])
             logging.info(f"Reel {idx + 1} downloaded: {url}")
+            return {"url": url, "status": "success"}
         except Exception as e:
             logging.error(f"Reel {idx + 1} not downloaded: {str(e)}")
+            return {"url": url, "status": "failed", "error": str(e)}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

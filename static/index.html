@@ -81,19 +81,24 @@
                 },
                 body: JSON.stringify({ urls: urls })
             })
-            .then(response => response.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'reels.zip';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.getElementById('status').innerText = 'Downloaded reels successfully.';
-                document.getElementById('status').classList.add('success');
-                document.getElementById('status').classList.remove('error');
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    let statusMessage = 'Downloaded reels successfully.';
+                    data.results.forEach(result => {
+                        statusMessage += `\nURL: ${result.url}, Status: ${result.status}`;
+                        if (result.status === 'failed') {
+                            statusMessage += `, Error: ${result.error}`;
+                        }
+                    });
+                    document.getElementById('status').innerText = statusMessage;
+                    document.getElementById('status').classList.add('success');
+                    document.getElementById('status').classList.remove('error');
+                } else {
+                    document.getElementById('status').innerText = 'Error: ' + data.message;
+                    document.getElementById('status').classList.add('error');
+                    document.getElementById('status').classList.remove('success');
+                }
                 document.getElementById('status').style.display = 'block';
             })
             .catch(error => {
