@@ -70,7 +70,7 @@
         document.getElementById('download-btn').addEventListener('click', function() {
             const urls = document.getElementById('urls').value.split('\n').filter(url => url.trim() !== '');
         
-            fetch('https://your-domain.com/download_reels', {
+            fetch('https://localhost:5001/download_reels', {  // Update with your HTTPS endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

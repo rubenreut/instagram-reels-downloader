@@ -6,10 +6,16 @@ import yt_dlp
 app = Flask(__name__, static_folder='static')
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+# Path to your SSL certificate and key files
+cert_path = 'cert.pem'
+key_path = 'key.pem'
+
+# Route to serve your index.html
 @app.route('/')
 def index():
     return send_from_directory(app.static_folder, 'index.html')
 
+# Route to handle downloading reels
 @app.route('/download_reels', methods=['POST'])
 def download_reels():
     data = request.json
@@ -25,6 +31,7 @@ def download_reels():
 
     return jsonify({"status": "success", "results": results})
 
+# Function to download a reel
 def download_reel(url, idx, output_directory):
     ydl_opts = {
         'outtmpl': os.path.join(output_directory, f'reel_{idx + 1}.%(ext)s'),
@@ -40,5 +47,6 @@ def download_reel(url, idx, output_directory):
         except Exception as e:
             return {"url": url, "status": "failed", "error": str(e)}
 
+# Run the Flask application with HTTPS
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True, ssl_context='adhoc')  # Enable HTTPS with adhoc SSL (for development/testing)
+    app.run(host='0.0.0.0', port=5001, debug=True, ssl_context=(cert_path, key_path))
