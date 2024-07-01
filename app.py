@@ -45,4 +45,7 @@ def download_reel(url, idx, output_directory):
             return {"url": url, "status": "failed", "error": str(e)}
 
 if __name__ == '__main__':
+    ssl_cert = '/Users/rubenreut/instagram-reels-downloader/cert.pem'
+    ssl_key = '/Users/rubenreut/instagram-reels-downloader/key.pem'
     app.run(host='0.0.0.0', port=8080, debug=True, ssl_context=(ssl_cert, ssl_key))
+
