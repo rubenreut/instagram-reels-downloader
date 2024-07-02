@@ -48,4 +48,3 @@ if __name__ == '__main__':
     ssl_cert = './cert.pem'
     ssl_key = './key.pem'
     app.run(host='0.0.0.0', port=8080, debug=True, ssl_context=(ssl_cert, ssl_key))
-
